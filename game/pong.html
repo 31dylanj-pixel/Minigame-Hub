@@ -1,235 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Pong - MiniGame Hub</title>
+    <title>Pong | MiniGame Hub</title>
 
-    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="pong.css">
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap"
-        rel="stylesheet">
-
 </head>
 
-<body class="game-page">
+<body>
 
-<header class="game-navbar">
+    <main class="pong-page">
 
-    <a href="../index.html" class="back-button">
-        ← Hub
-    </a>
+        <header class="game-header">
+            <a href="../index.html" class="back-button">
+                ← MiniGame Hub
+            </a>
 
-    <div class="game-title">
-        <span>🏓</span>
-        Pong
-    </div>
-
-    <button class="pause-button" id="pauseButton">
-        Pause
-    </button>
-
-</header>
-
-
-<main class="pong-container">
-
-    <!-- SCORE -->
-
-    <div class="scoreboard">
-
-        <div class="score-player">
-
-            <span class="score-label" id="leftPlayerLabel">
-                YOU
-            </span>
-
-            <span id="playerScore">
-                0
-            </span>
-
-        </div>
-
-        <div class="score-divider">
-            :
-        </div>
-
-        <div class="score-player">
-
-            <span class="score-label" id="rightPlayerLabel">
-                AI
-            </span>
-
-            <span id="aiScore">
-                0
-            </span>
-
-        </div>
-
-    </div>
-
-
-    <!-- GAME -->
-
-    <div class="pong-wrapper">
-
-        <canvas
-            id="pongCanvas"
-            width="1200"
-            height="650"
-        ></canvas>
-
-
-        <!-- START / PAUSE OVERLAY -->
-
-        <div class="game-overlay" id="gameOverlay">
-
-            <div class="overlay-content">
-
-                <span class="overlay-icon">
-                    🏓
-                </span>
-
-                <h1 id="overlayTitle">
-                    Pong
-                </h1>
-
-                <p id="overlayText">
-                    Choose how you want to play.
-                </p>
-
-
-                <!-- MODE SELECTION -->
-
-                <div class="menu-section" id="modeSelection">
-
-                    <button
-                        class="menu-button"
-                        id="onePlayerButton"
-                    >
-                        <strong>1 Player</strong>
-                        <span>Play against AI</span>
-                    </button>
-
-                    <button
-                        class="menu-button"
-                        id="twoPlayerButton"
-                    >
-                        <strong>2 Players</strong>
-                        <span>Play against a friend</span>
-                    </button>
-
+            <div class="scoreboard">
+                <div class="score player-score">
+                    <span id="playerScore">0</span>
                 </div>
 
+                <div class="score-divider">:</div>
 
-                <!-- DIFFICULTY -->
+                <div class="score opponent-score">
+                    <span id="opponentScore">0</span>
+                </div>
+            </div>
 
-                <div
-                    class="menu-section hidden"
-                    id="difficultySelection"
-                >
+            <button id="pauseButton" class="pause-button">
+                Pause
+            </button>
+        </header>
 
-                    <div class="difficulty-grid">
 
-                        <button class="difficulty-button" data-difficulty="noob">
-                            <strong>🥔 Noob</strong>
-                            <span>Very easy</span>
-                        </button>
+        <section class="game-container">
 
-                        <button class="difficulty-button" data-difficulty="easy">
-                            <strong>🟢 Easy</strong>
-                            <span>Casual</span>
-                        </button>
+            <canvas id="pongCanvas" width="1200" height="650"></canvas>
 
-                        <button class="difficulty-button" data-difficulty="medium">
-                            <strong>🟡 Medium</strong>
-                            <span>A challenge</span>
-                        </button>
+            <div id="countdown" class="countdown hidden">
+                3
+            </div>
 
-                        <button class="difficulty-button" data-difficulty="hard">
-                            <strong>🔴 Hard</strong>
-                            <span>Very tough</span>
-                        </button>
 
-                        <button class="difficulty-button impossible" data-difficulty="impossible">
-                            <strong>☠️ Impossible</strong>
-                            <span>Never misses</span>
+            <!-- START / MODE OVERLAY -->
+            <div id="overlay" class="overlay">
+
+                <div class="overlay-card">
+
+                    <h1 id="overlayTitle">Pong</h1>
+
+                    <p id="overlayText">
+                        Choose how you want to play.
+                    </p>
+
+
+                    <!-- MODE SELECTION -->
+                    <div id="modeSelection" class="selection-section">
+
+                        <div class="selection-grid mode-grid">
+
+                            <button class="selection-button" data-mode="1">
+                                <strong>1 Player</strong>
+                                <span>Play against AI</span>
+                            </button>
+
+                            <button class="selection-button" data-mode="2">
+                                <strong>2 Players</strong>
+                                <span>Play with a friend</span>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DIFFICULTY -->
+                    <div id="difficultySelection" class="selection-section hidden">
+
+                        <h2>Choose AI Difficulty</h2>
+
+                        <div class="selection-grid difficulty-grid">
+
+                            <button class="selection-button" data-difficulty="noob">
+                                <strong>Noob</strong>
+                                <span>Basically free</span>
+                            </button>
+
+                            <button class="selection-button" data-difficulty="easy">
+                                <strong>Easy</strong>
+                                <span>A little challenge</span>
+                            </button>
+
+                            <button class="selection-button" data-difficulty="medium">
+                                <strong>Medium</strong>
+                                <span>Getting serious</span>
+                            </button>
+
+                            <button class="selection-button" data-difficulty="hard">
+                                <strong>Hard</strong>
+                                <span>Good luck</span>
+                            </button>
+
+                            <button class="selection-button impossible-button" data-difficulty="impossible">
+                                <strong>Impossible</strong>
+                                <span>AI never misses</span>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PLAYER 1 COLOR -->
+                    <div id="playerColorSelection" class="selection-section hidden">
+
+                        <h2 id="playerColorTitle">
+                            Choose Your Color
+                        </h2>
+
+                        <div id="colorGrid" class="color-grid"></div>
+
+                        <button id="confirmPlayerColor" class="confirm-button">
+                            Continue
                         </button>
 
                     </div>
 
-                    <button
-                        class="back-menu-button"
-                        id="backToModes"
-                    >
-                        ← Back
+
+                    <!-- PLAYER 2 COLOR -->
+                    <div id="player2ColorSelection" class="selection-section hidden">
+
+                        <h2>
+                            Player 2 — Choose Your Color
+                        </h2>
+
+                        <div id="player2ColorGrid" class="color-grid"></div>
+
+                        <button id="startMatchButton" class="confirm-button">
+                            Start Match
+                        </button>
+
+                    </div>
+
+
+                    <!-- END SCREEN -->
+                    <button id="startButton" class="game-button hidden">
+                        Play Again
                     </button>
 
                 </div>
 
+            </div>
 
-                <!-- PLAY AGAIN / RESUME -->
+        </section>
 
-                <button
-                    class="game-button hidden"
-                    id="startButton"
-                >
-                    Start Game
-                </button>
 
+        <div class="controls-info">
+
+            <div>
+                <span class="key">W</span>
+                <span class="key">S</span>
+                Move
+            </div>
+
+            <div>
+                <span class="key">↑</span>
+                <span class="key">↓</span>
+                Player 2
+            </div>
+
+            <div>
+                <span class="key">SPACE</span>
+                Pause
             </div>
 
         </div>
 
-    </div>
+    </main>
 
-
-    <!-- CONTROLS -->
-
-    <div class="controls">
-
-        <div id="leftControls">
-            <strong>W / S</strong>
-            <span>Move</span>
-        </div>
-
-        <div>
-            <strong>SPACE</strong>
-            <span>Pause</span>
-        </div>
-
-        <div id="rightControls" class="hidden-control">
-            <strong>↑ / ↓</strong>
-            <span>Move</span>
-        </div>
-
-    </div>
-
-
-    <!-- MOBILE -->
-
-    <div class="mobile-controls">
-
-        <button id="upButton">
-            ▲
-        </button>
-
-        <button id="downButton">
-            ▼
-        </button>
-
-    </div>
-
-</main>
-
-
-<script src="pong.js"></script>
+    <script src="pong.js"></script>
 
 </body>
-
 </html>
