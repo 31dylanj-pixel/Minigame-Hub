@@ -2,14 +2,28 @@
    PONG
 ========================================================= */
 
-const canvas = document.getElementById("pongCanvas");
-const ctx = canvas.getContext("2d");
+const canvas =
+    document.getElementById("pongCanvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
 const playerScoreElement =
     document.getElementById("playerScore");
 
 const aiScoreElement =
     document.getElementById("aiScore");
+
+const leftPlayerLabel =
+    document.getElementById("leftPlayerLabel");
+
+const rightPlayerLabel =
+    document.getElementById("rightPlayerLabel");
 
 const overlay =
     document.getElementById("gameOverlay");
@@ -26,20 +40,80 @@ const startButton =
 const pauseButton =
     document.getElementById("pauseButton");
 
+const modeSelection =
+    document.getElementById("modeSelection");
+
+const difficultySelection =
+    document.getElementById("difficultySelection");
+
+const onePlayerButton =
+    document.getElementById("onePlayerButton");
+
+const twoPlayerButton =
+    document.getElementById("twoPlayerButton");
+
+const backToModes =
+    document.getElementById("backToModes");
+
+const leftControls =
+    document.getElementById("leftControls");
+
+const rightControls =
+    document.getElementById("rightControls");
+
 
 /* =========================================================
-   GAME SETTINGS
+   SETTINGS
 ========================================================= */
 
 const WIN_SCORE = 5;
 
-const PADDLE_WIDTH = 12;
-const PADDLE_HEIGHT = 90;
+const PADDLE_WIDTH = 14;
+const PADDLE_HEIGHT = 105;
 
-const PLAYER_SPEED = 7;
-const AI_SPEED = 5;
+const PLAYER_SPEED = 9;
+const SECOND_PLAYER_SPEED = 9;
 
-const BALL_SIZE = 10;
+const BALL_SIZE = 13;
+
+
+/* =========================================================
+   DIFFICULTIES
+========================================================= */
+
+const difficulties = {
+
+    noob: {
+        speed: 2.2,
+        error: 150,
+        reaction: 0.65
+    },
+
+    easy: {
+        speed: 4,
+        error: 75,
+        reaction: 0.72
+    },
+
+    medium: {
+        speed: 6,
+        error: 35,
+        reaction: 0.84
+    },
+
+    hard: {
+        speed: 8.5,
+        error: 10,
+        reaction: 0.94
+    },
+
+    impossible: {
+        speed: 14,
+        error: 0,
+        reaction: 1
+    }
+
+};
 
 
 /* =========================================================
@@ -52,7 +126,13 @@ let aiScore = 0;
 let gameRunning = false;
 let paused = false;
 
-let animationFrame;
+let gameMode = "1p";
+let selectedDifficulty = "medium";
+
+let aiTargetY =
+    canvas.height / 2;
+
+let aiErrorOffset = 0;
 
 
 /* =========================================================
@@ -61,9 +141,11 @@ let animationFrame;
 
 const player = {
 
-    x: 30,
+    x: 35,
 
-    y: canvas.height / 2 - PADDLE_HEIGHT / 2,
+    y:
+        canvas.height / 2 -
+        PADDLE_HEIGHT / 2,
 
     width: PADDLE_WIDTH,
 
@@ -74,17 +156,22 @@ const player = {
 };
 
 
-const ai = {
+const opponent = {
 
-    x: canvas.width - 30 - PADDLE_WIDTH,
+    x:
+        canvas.width -
+        35 -
+        PADDLE_WIDTH,
 
-    y: canvas.height / 2 - PADDLE_HEIGHT / 2,
+    y:
+        canvas.height / 2 -
+        PADDLE_HEIGHT / 2,
 
     width: PADDLE_WIDTH,
 
     height: PADDLE_HEIGHT,
 
-    speed: AI_SPEED
+    speed: 6
 
 };
 
@@ -97,9 +184,9 @@ const ball = {
 
     size: BALL_SIZE,
 
-    speed: 5,
+    speed: 7,
 
-    velocityX: 5,
+    velocityX: 7,
 
     velocityY: 2
 
@@ -113,27 +200,35 @@ const ball = {
 const keys = {};
 
 
-document.addEventListener("keydown", (event) => {
+document.addEventListener(
+    "keydown",
+    (event) => {
 
-    keys[event.key.toLowerCase()] = true;
+        keys[event.key.toLowerCase()] = true;
 
+        if (event.code === "Space") {
 
-    if (event.code === "Space") {
+            event.preventDefault();
 
-        event.preventDefault();
+            if (gameRunning) {
+                togglePause();
+            }
 
-        togglePause();
+        }
 
     }
+);
 
-});
 
+document.addEventListener(
+    "keyup",
+    (event) => {
 
-document.addEventListener("keyup", (event) => {
+        keys[event.key.toLowerCase()] =
+            false;
 
-    keys[event.key.toLowerCase()] = false;
-
-});
+    }
+);
 
 
 /* =========================================================
@@ -150,9 +245,7 @@ function draw() {
     );
 
 
-    /*
-        Background
-    */
+    /* Background */
 
     ctx.fillStyle = "#07111f";
 
@@ -164,16 +257,14 @@ function draw() {
     );
 
 
-    /*
-        Center line
-    */
+    /* Center line */
 
     ctx.strokeStyle =
         "rgba(255,255,255,0.10)";
 
     ctx.lineWidth = 2;
 
-    ctx.setLineDash([8, 12]);
+    ctx.setLineDash([10, 14]);
 
     ctx.beginPath();
 
@@ -192,9 +283,25 @@ function draw() {
     ctx.setLineDash([]);
 
 
-    /*
-        Paddles
-    */
+    /* Center circle */
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.07)";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        canvas.width / 2,
+        canvas.height / 2,
+        65,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.stroke();
+
+
+    /* Paddles */
 
     ctx.fillStyle = "#dcecff";
 
@@ -206,16 +313,14 @@ function draw() {
     );
 
     ctx.fillRect(
-        ai.x,
-        ai.y,
-        ai.width,
-        ai.height
+        opponent.x,
+        opponent.y,
+        opponent.width,
+        opponent.height
     );
 
 
-    /*
-        Ball
-    */
+    /* Ball */
 
     ctx.beginPath();
 
@@ -227,25 +332,7 @@ function draw() {
         Math.PI * 2
     );
 
-    ctx.fill();
-
-
-    /*
-        Center dot
-    */
-
-    ctx.beginPath();
-
-    ctx.arc(
-        canvas.width / 2,
-        canvas.height / 2,
-        3,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fillStyle =
-        "rgba(255,255,255,0.25)";
+    ctx.fillStyle = "#ffffff";
 
     ctx.fill();
 
@@ -253,28 +340,7 @@ function draw() {
 
 
 /* =========================================================
-   RESET BALL
-========================================================= */
-
-function resetBall(direction) {
-
-    ball.x = canvas.width / 2;
-
-    ball.y = canvas.height / 2;
-
-    ball.speed = 5;
-
-    ball.velocityX =
-        direction * ball.speed;
-
-    ball.velocityY =
-        (Math.random() * 4) - 2;
-
-}
-
-
-/* =========================================================
-   RESET POSITIONS
+   RESET
 ========================================================= */
 
 function resetPositions() {
@@ -283,15 +349,37 @@ function resetPositions() {
         canvas.height / 2 -
         player.height / 2;
 
-    ai.y =
+    opponent.y =
         canvas.height / 2 -
-        ai.height / 2;
+        opponent.height / 2;
+
+}
+
+
+function resetBall(direction) {
+
+    ball.x =
+        canvas.width / 2;
+
+    ball.y =
+        canvas.height / 2;
+
+    ball.speed = 7;
+
+    ball.velocityX =
+        direction * ball.speed;
+
+    ball.velocityY =
+        (Math.random() * 5) - 2.5;
+
+    aiTargetY =
+        canvas.height / 2;
 
 }
 
 
 /* =========================================================
-   PLAYER
+   PLAYER 1
 ========================================================= */
 
 function updatePlayer() {
@@ -308,18 +396,32 @@ function updatePlayer() {
 
     }
 
+    clampPaddle(player);
 
-    /*
-        Keep paddle inside arena
-    */
+}
 
-    player.y = Math.max(
-        0,
-        Math.min(
-            canvas.height - player.height,
-            player.y
-        )
-    );
+
+/* =========================================================
+   PLAYER 2
+========================================================= */
+
+function updateSecondPlayer() {
+
+    if (keys["arrowup"]) {
+
+        opponent.y -=
+            SECOND_PLAYER_SPEED;
+
+    }
+
+    if (keys["arrowdown"]) {
+
+        opponent.y +=
+            SECOND_PLAYER_SPEED;
+
+    }
+
+    clampPaddle(opponent);
 
 }
 
@@ -330,28 +432,116 @@ function updatePlayer() {
 
 function updateAI() {
 
-    const target =
-        ball.y - ai.height / 2;
+    const settings =
+        difficulties[selectedDifficulty];
 
 
-    if (ai.y < target) {
+    /*
+        Impossible tracks the ball
+        perfectly.
+    */
 
-        ai.y += ai.speed;
+    if (
+        selectedDifficulty ===
+        "impossible"
+    ) {
+
+        aiTargetY =
+            ball.y -
+            opponent.height / 2;
 
     }
 
-    if (ai.y > target) {
+    else {
 
-        ai.y -= ai.speed;
+        /*
+            Only update the target when
+            the ball is moving toward AI.
+        */
+
+        if (ball.velocityX > 0) {
+
+            const target =
+                ball.y -
+                opponent.height / 2;
+
+            aiTargetY =
+                target +
+                aiErrorOffset;
+
+        }
+
+        else {
+
+            aiTargetY =
+                canvas.height / 2 -
+                opponent.height / 2;
+
+        }
 
     }
 
 
-    ai.y = Math.max(
+    const difference =
+        aiTargetY -
+        opponent.y;
+
+
+    const movement =
+        Math.sign(difference) *
+        Math.min(
+            Math.abs(difference),
+            settings.speed
+        );
+
+
+    /*
+        Reaction factor makes lower
+        difficulties respond less accurately.
+    */
+
+    opponent.y +=
+        movement *
+        settings.reaction;
+
+
+    clampPaddle(opponent);
+
+
+    /*
+        Occasionally create a new
+        prediction error.
+    */
+
+    if (
+        selectedDifficulty !==
+        "impossible" &&
+        Math.random() < 0.015
+    ) {
+
+        aiErrorOffset =
+            (
+                Math.random() * 2 - 1
+            ) *
+            settings.error;
+
+    }
+
+}
+
+
+/* =========================================================
+   CLAMP PADDLE
+========================================================= */
+
+function clampPaddle(paddle) {
+
+    paddle.y = Math.max(
         0,
         Math.min(
-            canvas.height - ai.height,
-            ai.y
+            canvas.height -
+                paddle.height,
+            paddle.y
         )
     );
 
@@ -367,18 +557,69 @@ function paddleCollision(paddle) {
     return (
 
         ball.x - ball.size / 2 <
-            paddle.x + paddle.width &&
+            paddle.x +
+            paddle.width &&
 
         ball.x + ball.size / 2 >
             paddle.x &&
 
         ball.y - ball.size / 2 <
-            paddle.y + paddle.height &&
+            paddle.y +
+            paddle.height &&
 
         ball.y + ball.size / 2 >
             paddle.y
 
     );
+
+}
+
+
+/* =========================================================
+   BOUNCE
+========================================================= */
+
+function bounceFromPaddle(paddle) {
+
+    const center =
+        paddle.y +
+        paddle.height / 2;
+
+    const difference =
+        ball.y - center;
+
+    const normalized =
+        difference /
+        (paddle.height / 2);
+
+    const maxAngle =
+        Math.PI / 3;
+
+    const angle =
+        normalized * maxAngle;
+
+
+    ball.speed =
+        Math.min(
+            ball.speed + 0.45,
+            18
+        );
+
+
+    const direction =
+        ball.velocityX > 0
+            ? -1
+            : 1;
+
+
+    ball.velocityX =
+        Math.cos(angle) *
+        ball.speed *
+        direction;
+
+    ball.velocityY =
+        Math.sin(angle) *
+        ball.speed;
 
 }
 
@@ -394,13 +635,15 @@ function updateBall() {
     ball.y += ball.velocityY;
 
 
-    /*
-        Top / bottom
-    */
+    /* Top / bottom */
 
     if (
-        ball.y - ball.size / 2 <= 0 ||
-        ball.y + ball.size / 2 >= canvas.height
+        ball.y -
+            ball.size / 2 <= 0 ||
+
+        ball.y +
+            ball.size / 2 >=
+            canvas.height
     ) {
 
         ball.velocityY *= -1;
@@ -408,9 +651,7 @@ function updateBall() {
     }
 
 
-    /*
-        Player collision
-    */
+    /* Player */
 
     if (
         ball.velocityX < 0 &&
@@ -427,106 +668,57 @@ function updateBall() {
     }
 
 
-    /*
-        AI collision
-    */
+    /* Opponent */
 
     if (
         ball.velocityX > 0 &&
-        paddleCollision(ai)
+        paddleCollision(opponent)
     ) {
 
         ball.x =
-            ai.x -
+            opponent.x -
             ball.size / 2;
 
-        bounceFromPaddle(ai);
+        bounceFromPaddle(opponent);
 
     }
 
 
-    /*
-        Score
-    */
+    /* Left score */
 
-    if (ball.x < 0) {
+    if (ball.x < -ball.size) {
 
         aiScore++;
 
         updateScore();
 
-        checkWinner();
-
-        if (gameRunning) {
-
-            resetBall(1);
-
+        if (checkWinner()) {
+            return;
         }
+
+        resetBall(1);
 
     }
 
 
-    if (ball.x > canvas.width) {
+    /* Right score */
+
+    if (
+        ball.x >
+        canvas.width + ball.size
+    ) {
 
         playerScore++;
 
         updateScore();
 
-        checkWinner();
-
-        if (gameRunning) {
-
-            resetBall(-1);
-
+        if (checkWinner()) {
+            return;
         }
 
+        resetBall(-1);
+
     }
-
-}
-
-
-/* =========================================================
-   PADDLE BOUNCE
-========================================================= */
-
-function bounceFromPaddle(paddle) {
-
-    const paddleCenter =
-        paddle.y + paddle.height / 2;
-
-    const difference =
-        ball.y - paddleCenter;
-
-    const normalized =
-        difference / (paddle.height / 2);
-
-
-    const maxAngle =
-        Math.PI / 3;
-
-    const angle =
-        normalized * maxAngle;
-
-
-    ball.speed =
-        Math.min(
-            ball.speed + 0.35,
-            12
-        );
-
-
-    const direction =
-        ball.velocityX > 0 ? -1 : 1;
-
-
-    ball.velocityX =
-        Math.cos(angle) *
-        ball.speed *
-        direction;
-
-    ball.velocityY =
-        Math.sin(angle) *
-        ball.speed;
 
 }
 
@@ -552,17 +744,26 @@ function updateScore() {
 
 function checkWinner() {
 
-    if (playerScore >= WIN_SCORE) {
+    if (
+        playerScore >= WIN_SCORE ||
+        aiScore >= WIN_SCORE
+    ) {
 
-        endGame("You Win!");
+        endGame(
+            playerScore >= WIN_SCORE
+                ? "You Win!"
+                : (
+                    gameMode === "2p"
+                        ? "Player 2 Wins!"
+                        : "AI Wins!"
+                )
+        );
+
+        return true;
 
     }
 
-    else if (aiScore >= WIN_SCORE) {
-
-        endGame("AI Wins!");
-
-    }
+    return false;
 
 }
 
@@ -573,30 +774,172 @@ function checkWinner() {
 
 function gameLoop() {
 
-    if (gameRunning && !paused) {
+    if (
+        gameRunning &&
+        !paused
+    ) {
 
         updatePlayer();
 
-        updateAI();
+        if (gameMode === "1p") {
+
+            updateAI();
+
+        }
+
+        else {
+
+            updateSecondPlayer();
+
+        }
 
         updateBall();
 
     }
 
-
     draw();
 
-    animationFrame =
-        requestAnimationFrame(gameLoop);
+    requestAnimationFrame(gameLoop);
 
 }
 
 
 /* =========================================================
-   START
+   MODE SELECTION
 ========================================================= */
 
-function startGame() {
+onePlayerButton.addEventListener(
+    "click",
+    () => {
+
+        gameMode = "1p";
+
+        modeSelection.classList.add(
+            "hidden"
+        );
+
+        difficultySelection.classList.remove(
+            "hidden"
+        );
+
+        overlayTitle.textContent =
+            "Choose Difficulty";
+
+        overlayText.textContent =
+            "How good should the AI be?";
+
+    }
+);
+
+
+twoPlayerButton.addEventListener(
+    "click",
+    () => {
+
+        gameMode = "2p";
+
+        setupTwoPlayer();
+
+        beginGame();
+
+    }
+);
+
+
+backToModes.addEventListener(
+    "click",
+    () => {
+
+        difficultySelection.classList.add(
+            "hidden"
+        );
+
+        modeSelection.classList.remove(
+            "hidden"
+        );
+
+        overlayTitle.textContent =
+            "Pong";
+
+        overlayText.textContent =
+            "Choose how you want to play.";
+
+    }
+);
+
+
+/* =========================================================
+   DIFFICULTY SELECTION
+========================================================= */
+
+document
+    .querySelectorAll(".difficulty-button")
+    .forEach((button) => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                selectedDifficulty =
+                    button.dataset.difficulty;
+
+                setupOnePlayer();
+
+                beginGame();
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   MODE SETUP
+========================================================= */
+
+function setupOnePlayer() {
+
+    leftPlayerLabel.textContent =
+        "YOU";
+
+    rightPlayerLabel.textContent =
+        "AI";
+
+    leftControls.classList.remove(
+        "hidden-control"
+    );
+
+    rightControls.classList.add(
+        "hidden-control"
+    );
+
+}
+
+
+function setupTwoPlayer() {
+
+    leftPlayerLabel.textContent =
+        "PLAYER 1";
+
+    rightPlayerLabel.textContent =
+        "PLAYER 2";
+
+    leftControls.classList.remove(
+        "hidden-control"
+    );
+
+    rightControls.classList.remove(
+        "hidden-control"
+    );
+
+}
+
+
+/* =========================================================
+   BEGIN GAME
+========================================================= */
+
+function beginGame() {
 
     playerScore = 0;
 
@@ -607,7 +950,9 @@ function startGame() {
     resetPositions();
 
     resetBall(
-        Math.random() > 0.5 ? 1 : -1
+        Math.random() > 0.5
+            ? 1
+            : -1
     );
 
     gameRunning = true;
@@ -624,7 +969,7 @@ function startGame() {
 
 
 /* =========================================================
-   END
+   END GAME
 ========================================================= */
 
 function endGame(message) {
@@ -639,6 +984,18 @@ function endGame(message) {
     overlayText.textContent =
         `${playerScore} — ${aiScore}`;
 
+    modeSelection.classList.add(
+        "hidden"
+    );
+
+    difficultySelection.classList.add(
+        "hidden"
+    );
+
+    startButton.classList.remove(
+        "hidden"
+    );
+
     startButton.textContent =
         "Play Again";
 
@@ -646,6 +1003,32 @@ function endGame(message) {
         "grid";
 
 }
+
+
+/* =========================================================
+   START BUTTON
+========================================================= */
+
+startButton.addEventListener(
+    "click",
+    () => {
+
+        startButton.classList.add(
+            "hidden"
+        );
+
+        modeSelection.classList.remove(
+            "hidden"
+        );
+
+        overlayTitle.textContent =
+            "Pong";
+
+        overlayText.textContent =
+            "Choose how you want to play.";
+
+    }
+);
 
 
 /* =========================================================
@@ -658,20 +1041,28 @@ function togglePause() {
         return;
     }
 
-
     paused = !paused;
 
 
     if (paused) {
 
-        pauseButton.textContent =
-            "Resume";
-
         overlayTitle.textContent =
             "Paused";
 
         overlayText.textContent =
-            "Take a break.";
+            "The game is paused.";
+
+        modeSelection.classList.add(
+            "hidden"
+        );
+
+        difficultySelection.classList.add(
+            "hidden"
+        );
+
+        startButton.classList.remove(
+            "hidden"
+        );
 
         startButton.textContent =
             "Resume";
@@ -679,43 +1070,19 @@ function togglePause() {
         overlay.style.display =
             "grid";
 
-    }
-
-    else {
-
-        pauseButton.textContent =
-            "Pause";
-
-        overlay.style.display =
-            "none";
+        return;
 
     }
+
+
+    overlay.style.display =
+        "none";
+
+    startButton.classList.add(
+        "hidden"
+    );
 
 }
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-startButton.addEventListener(
-    "click",
-    () => {
-
-        if (paused) {
-
-            togglePause();
-
-        }
-
-        else {
-
-            startGame();
-
-        }
-
-    }
-);
 
 
 pauseButton.addEventListener(
@@ -739,32 +1106,28 @@ function movePlayer(amount) {
 
     player.y += amount;
 
-    player.y = Math.max(
-        0,
-        Math.min(
-            canvas.height - player.height,
-            player.y
-        )
-    );
+    clampPaddle(player);
 
 }
 
 
 upButton.addEventListener(
     "pointerdown",
-    () => movePlayer(-35)
+    () => movePlayer(-45)
 );
 
 
 downButton.addEventListener(
     "pointerdown",
-    () => movePlayer(35)
+    () => movePlayer(45)
 );
 
 
 /* =========================================================
    INITIALIZE
 ========================================================= */
+
+setupOnePlayer();
 
 resetPositions();
 
