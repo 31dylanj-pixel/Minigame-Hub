@@ -17,9 +17,7 @@
 
 </head>
 
-
 <body class="game-page">
-
 
 <header class="game-navbar">
 
@@ -41,14 +39,13 @@
 
 <main class="pong-container">
 
-
     <!-- SCORE -->
 
     <div class="scoreboard">
 
         <div class="score-player">
 
-            <span class="score-label">
+            <span class="score-label" id="leftPlayerLabel">
                 YOU
             </span>
 
@@ -58,15 +55,13 @@
 
         </div>
 
-
         <div class="score-divider">
             :
         </div>
 
-
         <div class="score-player">
 
-            <span class="score-label">
+            <span class="score-label" id="rightPlayerLabel">
                 AI
             </span>
 
@@ -85,10 +80,12 @@
 
         <canvas
             id="pongCanvas"
-            width="900"
-            height="500"
+            width="1200"
+            height="650"
         ></canvas>
 
+
+        <!-- START / PAUSE OVERLAY -->
 
         <div class="game-overlay" id="gameOverlay">
 
@@ -103,11 +100,83 @@
                 </h1>
 
                 <p id="overlayText">
-                    First to 5 wins.
+                    Choose how you want to play.
                 </p>
 
+
+                <!-- MODE SELECTION -->
+
+                <div class="menu-section" id="modeSelection">
+
+                    <button
+                        class="menu-button"
+                        id="onePlayerButton"
+                    >
+                        <strong>1 Player</strong>
+                        <span>Play against AI</span>
+                    </button>
+
+                    <button
+                        class="menu-button"
+                        id="twoPlayerButton"
+                    >
+                        <strong>2 Players</strong>
+                        <span>Play against a friend</span>
+                    </button>
+
+                </div>
+
+
+                <!-- DIFFICULTY -->
+
+                <div
+                    class="menu-section hidden"
+                    id="difficultySelection"
+                >
+
+                    <div class="difficulty-grid">
+
+                        <button class="difficulty-button" data-difficulty="noob">
+                            <strong>🥔 Noob</strong>
+                            <span>Very easy</span>
+                        </button>
+
+                        <button class="difficulty-button" data-difficulty="easy">
+                            <strong>🟢 Easy</strong>
+                            <span>Casual</span>
+                        </button>
+
+                        <button class="difficulty-button" data-difficulty="medium">
+                            <strong>🟡 Medium</strong>
+                            <span>A challenge</span>
+                        </button>
+
+                        <button class="difficulty-button" data-difficulty="hard">
+                            <strong>🔴 Hard</strong>
+                            <span>Very tough</span>
+                        </button>
+
+                        <button class="difficulty-button impossible" data-difficulty="impossible">
+                            <strong>☠️ Impossible</strong>
+                            <span>Never misses</span>
+                        </button>
+
+                    </div>
+
+                    <button
+                        class="back-menu-button"
+                        id="backToModes"
+                    >
+                        ← Back
+                    </button>
+
+                </div>
+
+
+                <!-- PLAY AGAIN / RESUME -->
+
                 <button
-                    class="game-button"
+                    class="game-button hidden"
                     id="startButton"
                 >
                     Start Game
@@ -124,7 +193,7 @@
 
     <div class="controls">
 
-        <div>
+        <div id="leftControls">
             <strong>W / S</strong>
             <span>Move</span>
         </div>
@@ -132,6 +201,11 @@
         <div>
             <strong>SPACE</strong>
             <span>Pause</span>
+        </div>
+
+        <div id="rightControls" class="hidden-control">
+            <strong>↑ / ↓</strong>
+            <span>Move</span>
         </div>
 
     </div>
@@ -150,7 +224,6 @@
         </button>
 
     </div>
-
 
 </main>
 
