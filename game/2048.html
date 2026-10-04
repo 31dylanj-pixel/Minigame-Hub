@@ -1,1 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>2048 | MiniGame Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Poppins:wght@400;500;600&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="2048.css">
+</head>
+
+<body>
+
+    <main class="game-page">
+
+        <!-- HEADER -->
+
+        <header class="game-header">
+
+            <a
+                href="../index.html"
+                class="back-button"
+            >
+                ← MiniGame Hub
+            </a>
+
+
+            <div class="title-area">
+
+                <h1>2048</h1>
+
+                <p>
+                    Join the numbers and get to 2048!
+                </p>
+
+            </div>
+
+
+            <button
+                id="newGameButton"
+                class="new-game-button"
+            >
+                New Game
+            </button>
+
+        </header>
+
+
+        <!-- SCORE -->
+
+        <section class="score-row">
+
+            <div class="score-card">
+
+                <span>Score</span>
+
+                <strong id="score">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="score-card">
+
+                <span>Best</span>
+
+                <strong id="bestScore">
+                    0
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- GAME -->
+
+        <section
+            id="gameBoard"
+            class="game-board"
+        >
+
+            <div class="grid-background">
+
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+                <div class="grid-cell"></div>
+
+            </div>
+
+
+            <div
+                id="tileContainer"
+                class="tile-container"
+            ></div>
+
+
+            <!-- GAME OVER -->
+
+            <div
+                id="gameOverOverlay"
+                class="game-overlay hidden"
+            >
+
+                <div class="overlay-card">
+
+                    <h2>Game Over</h2>
+
+                    <p>
+                        No more moves.
+                    </p>
+
+                    <div class="final-score">
+                        Score:
+                        <strong id="finalScore">
+                            0
+                        </strong>
+                    </div>
+
+                    <button
+                        id="gameOverNewGame"
+                        class="primary-button"
+                    >
+                        Try Again
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- 2048 WIN POPUP -->
+
+        <div
+            id="winOverlay"
+            class="modal-overlay hidden"
+        >
+
+            <div class="modal-card">
+
+                <div class="modal-icon">
+                    2048
+                </div>
+
+                <h2>
+                    You reached 2048!
+                </h2>
+
+                <p>
+                    Do you want to continue playing?
+                </p>
+
+
+                <div class="modal-buttons">
+
+                    <button
+                        id="continueButton"
+                        class="primary-button"
+                    >
+                        Keep Playing
+                    </button>
+
+                    <button
+                        id="doneButton"
+                        class="secondary-button"
+                    >
+                        I'm Done
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONFIRM EXIT -->
+
+        <div
+            id="confirmOverlay"
+            class="modal-overlay hidden"
+        >
+
+            <div class="modal-card confirm-card">
+
+                <div class="warning-icon">
+                    ?
+                </div>
+
+                <h2>
+                    Are you sure?
+                </h2>
+
+                <p>
+                    You could keep going and see how high
+                    you can get.
+                </p>
+
+
+                <div class="modal-buttons">
+
+                    <button
+                        id="exitButton"
+                        class="danger-button"
+                    >
+                        Exit
+                    </button>
+
+                    <button
+                        id="cancelButton"
+                        class="secondary-button"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONTROLS -->
+
+        <section class="instructions">
+
+            <div class="instruction-main">
+
+                <strong>
+                    How to play
+                </strong>
+
+                <span>
+                    Use your arrow keys or WASD to move the tiles.
+                </span>
+
+            </div>
+
+            <div class="keys">
+
+                <span>↑</span>
+                <span>↓</span>
+                <span>←</span>
+                <span>→</span>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="2048.js"></script>
+
+</body>
+
+</html>
