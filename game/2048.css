@@ -224,13 +224,13 @@ body {
 .game-board {
     position: relative;
 
-    width: min(650px, 90vw);
+    width: min(760px, 88vw);
 
     aspect-ratio: 1 / 1;
 
-    padding: 14px;
+    padding: 16px;
 
-    border-radius: 20px;
+    border-radius: 22px;
 
     background:
         linear-gradient(
@@ -242,10 +242,9 @@ body {
     border: 1px solid rgba(255,255,255,0.08);
 
     box-shadow:
-        0 30px 80px rgba(0,0,0,0.45),
+        0 30px 90px rgba(0,0,0,0.48),
         inset 0 0 30px rgba(0,0,0,0.2);
 }
-
 
 /* =========================================================
    GRID
@@ -363,6 +362,141 @@ body {
 
 }
 
+/* =========================================================
+   TILE MOVEMENT
+========================================================= */
+
+.tile {
+    position: relative;
+
+    will-change: transform;
+
+    transform-origin: center;
+
+    transition:
+        transform 145ms cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        );
+}
+
+
+/*
+    Subtle ghost behind moving tiles.
+
+    It uses the tile's own color,
+    so turquoise tiles leave a turquoise
+    trace, yellow leaves yellow, etc.
+*/
+
+.tile[style*="transform"]::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 8%;
+
+    border-radius: inherit;
+
+    background: inherit;
+
+    opacity: 0.12;
+
+    filter: blur(7px);
+
+    z-index: -1;
+
+    transform: scale(0.92);
+}
+
+
+/* =========================================================
+   NEW TILE
+========================================================= */
+
+.tile.new-tile {
+    animation:
+        tileAppear 150ms
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        );
+}
+
+
+/* =========================================================
+   MERGE
+========================================================= */
+
+.tile.merged {
+    animation:
+        tileMerge 180ms
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        );
+}
+
+
+@keyframes tileAppear {
+
+    0% {
+        opacity: 0;
+
+        transform: scale(0.55);
+    }
+
+    70% {
+        opacity: 1;
+
+        transform: scale(1.08);
+    }
+
+    100% {
+        opacity: 1;
+
+        transform: scale(1);
+    }
+
+}
+
+
+@keyframes tileMerge {
+
+    0% {
+        transform: scale(1);
+    }
+
+    45% {
+        transform: scale(1.13);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .tile {
+        transition: none !important;
+
+        animation: none !important;
+    }
+
+}
 
 /* =========================================================
    TILE COLORS
@@ -854,7 +988,7 @@ body {
 
     .grid-background,
     .tile-container {
-        inset: 10px;
+       inset: 16px;
 
         gap: 8px;
     }
@@ -867,13 +1001,19 @@ body {
 
 
     .instructions {
-        width: 94vw;
-
-        flex-direction: column;
-
-        gap: 10px;
-
-        text-align: center;
+       width: min(760px, 88vw);
+   
+       margin-top: 18px;
+   
+       display: flex;
+   
+       align-items: center;
+   
+       justify-content: space-between;
+   
+       color: rgba(255,255,255,0.4);
+   
+       font-size: 11px;
     }
 
 
@@ -889,8 +1029,38 @@ body {
    VERY SMALL SCREENS
 ========================================================= */
 
-@media (max-width: 400px) {
+@media (max-width: 700px) {
 
+    .game-board {
+        width: 94vw;
+
+        padding: 10px;
+
+        border-radius: 16px;
+    }
+
+    .grid-background,
+    .tile-container {
+        inset: 10px;
+
+        gap: 8px;
+    }
+
+    .grid-cell,
+    .tile {
+        border-radius: 8px;
+    }
+
+    .instructions {
+        width: 94vw;
+
+        flex-direction: column;
+
+        gap: 10px;
+
+        text-align: center;
+    }
+   
     .game-header {
         grid-template-columns: 1fr;
 
