@@ -2,37 +2,38 @@
    PONG
 ========================================================= */
 
-const canvas =
-    document.getElementById("pongCanvas");
-
-const ctx =
-    canvas.getContext("2d");
+const canvas = document.getElementById("pongCanvas");
+const ctx = canvas.getContext("2d");
 
 
 /* =========================================================
-   ELEMENTS
+   UI
 ========================================================= */
 
-const playerScoreElement =
-    document.getElementById("playerScore");
+const overlay = document.getElementById("overlay");
+const overlayTitle = document.getElementById("overlayTitle");
+const overlayText = document.getElementById("overlayText");
 
-const aiScoreElement =
-    document.getElementById("aiScore");
+const modeSelection = document.getElementById("modeSelection");
+const difficultySelection = document.getElementById("difficultySelection");
 
-const leftPlayerLabel =
-    document.getElementById("leftPlayerLabel");
+const playerColorSelection =
+    document.getElementById("playerColorSelection");
 
-const rightPlayerLabel =
-    document.getElementById("rightPlayerLabel");
+const player2ColorSelection =
+    document.getElementById("player2ColorSelection");
 
-const overlay =
-    document.getElementById("gameOverlay");
+const colorGrid =
+    document.getElementById("colorGrid");
 
-const overlayTitle =
-    document.getElementById("overlayTitle");
+const player2ColorGrid =
+    document.getElementById("player2ColorGrid");
 
-const overlayText =
-    document.getElementById("overlayText");
+const confirmPlayerColor =
+    document.getElementById("confirmPlayerColor");
+
+const startMatchButton =
+    document.getElementById("startMatchButton");
 
 const startButton =
     document.getElementById("startButton");
@@ -40,41 +41,119 @@ const startButton =
 const pauseButton =
     document.getElementById("pauseButton");
 
-const modeSelection =
-    document.getElementById("modeSelection");
+const countdownElement =
+    document.getElementById("countdown");
 
-const difficultySelection =
-    document.getElementById("difficultySelection");
+const playerScoreElement =
+    document.getElementById("playerScore");
 
-const onePlayerButton =
-    document.getElementById("onePlayerButton");
-
-const twoPlayerButton =
-    document.getElementById("twoPlayerButton");
-
-const backToModes =
-    document.getElementById("backToModes");
-
-const leftControls =
-    document.getElementById("leftControls");
-
-const rightControls =
-    document.getElementById("rightControls");
+const opponentScoreElement =
+    document.getElementById("opponentScore");
 
 
 /* =========================================================
-   SETTINGS
+   COLORS
 ========================================================= */
 
-const WIN_SCORE = 5;
+/*
+    15 normal player colors.
 
-const PADDLE_WIDTH = 14;
-const PADDLE_HEIGHT = 105;
+    Red is deliberately NOT included here because
+    the AI always owns red.
+*/
 
-const PLAYER_SPEED = 9;
-const SECOND_PLAYER_SPEED = 9;
+const playerColors = [
+    {
+        name: "Turquoise",
+        value: "#40E0D0"
+    },
 
-const BALL_SIZE = 13;
+    {
+        name: "Cyan",
+        value: "#00FFFF"
+    },
+
+    {
+        name: "Royal Blue",
+        value: "#4169E1"
+    },
+
+    {
+        name: "Yellow",
+        value: "#FFD700"
+    },
+
+    {
+        name: "Lime",
+        value: "#32CD32"
+    },
+
+    {
+        name: "Orange",
+        value: "#FF8C00"
+    },
+
+    {
+        name: "Pink",
+        value: "#FF69B4"
+    },
+
+    {
+        name: "Purple",
+        value: "#A855F7"
+    },
+
+    {
+        name: "Violet",
+        value: "#8A2BE2"
+    },
+
+    {
+        name: "Sky Blue",
+        value: "#38BDF8"
+    },
+
+    {
+        name: "Emerald",
+        value: "#10B981"
+    },
+
+    {
+        name: "Gold",
+        value: "#FACC15"
+    },
+
+    {
+        name: "Coral",
+        value: "#FF7F50"
+    },
+
+    {
+        name: "Hot Pink",
+        value: "#FF1493"
+    },
+
+    {
+        name: "White",
+        value: "#FFFFFF"
+    }
+];
+
+
+const redColor = {
+    name: "Red",
+    value: "#FF3B4A"
+};
+
+
+/*
+    2P gets all 16 colors.
+*/
+
+const twoPlayerColors = [
+    redColor,
+    ...playerColors
+];
 
 
 /* =========================================================
@@ -108,7 +187,7 @@ const difficulties = {
     },
 
     impossible: {
-        speed: 14,
+        speed: 20,
         error: 0,
         reaction: 1
     }
@@ -120,61 +199,66 @@ const difficulties = {
    GAME STATE
 ========================================================= */
 
-let playerScore = 0;
-let aiScore = 0;
+let gameMode = null;
+let difficulty = null;
 
-let gameRunning = false;
+let playerColor = playerColors[0].value;
+let opponentColor = redColor.value;
+
+let player2Color = null;
+
+let running = false;
 let paused = false;
+let countingDown = false;
 
-let gameMode = "1p";
-let selectedDifficulty = "medium";
-
-let aiTargetY =
-    canvas.height / 2;
-
-let aiErrorOffset = 0;
+let playerScore = 0;
+let opponentScore = 0;
 
 
 /* =========================================================
-   OBJECTS
+   PADDLES
 ========================================================= */
+
+const paddleWidth = 18;
+const paddleHeight = 115;
 
 const player = {
 
     x: 35,
 
-    y:
-        canvas.height / 2 -
-        PADDLE_HEIGHT / 2,
+    y: canvas.height / 2 - paddleHeight / 2,
 
-    width: PADDLE_WIDTH,
+    width: paddleWidth,
 
-    height: PADDLE_HEIGHT,
+    height: paddleHeight,
 
-    speed: PLAYER_SPEED
+    speed: 9,
+
+    color: playerColor
 
 };
 
 
 const opponent = {
 
-    x:
-        canvas.width -
-        35 -
-        PADDLE_WIDTH,
+    x: canvas.width - 35 - paddleWidth,
 
-    y:
-        canvas.height / 2 -
-        PADDLE_HEIGHT / 2,
+    y: canvas.height / 2 - paddleHeight / 2,
 
-    width: PADDLE_WIDTH,
+    width: paddleWidth,
 
-    height: PADDLE_HEIGHT,
+    height: paddleHeight,
 
-    speed: 6
+    speed: 6,
+
+    color: opponentColor
 
 };
 
+
+/* =========================================================
+   BALL
+========================================================= */
 
 const ball = {
 
@@ -182,15 +266,24 @@ const ball = {
 
     y: canvas.height / 2,
 
-    size: BALL_SIZE,
+    radius: 10,
 
-    speed: 7,
+    speed: 9,
 
-    velocityX: 7,
+    velocityX: 0,
 
-    velocityY: 2
+    velocityY: 0
 
 };
+
+
+/* =========================================================
+   BALL TRAIL
+========================================================= */
+
+const ballTrail = [];
+
+const MAX_TRAIL_LENGTH = 12;
 
 
 /* =========================================================
@@ -200,42 +293,1055 @@ const ball = {
 const keys = {};
 
 
-document.addEventListener(
-    "keydown",
-    (event) => {
+document.addEventListener("keydown", (event) => {
 
-        keys[event.key.toLowerCase()] = true;
+    keys[event.key.toLowerCase()] = true;
 
-        if (event.code === "Space") {
 
-            event.preventDefault();
+    if (
+        event.code === "Space" &&
+        running &&
+        !countingDown
+    ) {
 
-            if (gameRunning) {
-                togglePause();
-            }
+        togglePause();
 
-        }
-
+        event.preventDefault();
     }
-);
+
+});
 
 
-document.addEventListener(
-    "keyup",
-    (event) => {
+document.addEventListener("keyup", (event) => {
 
-        keys[event.key.toLowerCase()] =
-            false;
+    keys[event.key.toLowerCase()] = false;
 
-    }
-);
+});
 
 
 /* =========================================================
-   DRAW
+   COLOR PICKER
 ========================================================= */
 
-function draw() {
+function createColorButtons(container, colors, selectedColor, onSelect) {
+
+    container.innerHTML = "";
+
+
+    colors.forEach((color) => {
+
+        const button =
+            document.createElement("button");
+
+        button.className = "color-option";
+
+        button.title = color.name;
+
+        button.style.background = color.value;
+
+        button.style.color = color.value;
+
+
+        if (color.value === selectedColor) {
+
+            button.classList.add("selected");
+
+        }
+
+
+        button.addEventListener("click", () => {
+
+            onSelect(color.value);
+
+        });
+
+
+        container.appendChild(button);
+
+    });
+
+}
+
+
+/* =========================================================
+   UPDATE COLOR BUTTON STATES
+========================================================= */
+
+function updatePlayerColorPicker() {
+
+    createColorButtons(
+        colorGrid,
+        playerColors,
+        playerColor,
+        (color) => {
+
+            playerColor = color;
+
+            player.color = color;
+
+            updatePlayerColorPicker();
+
+        }
+    );
+
+}
+
+
+function updatePlayer2ColorPicker() {
+
+    createColorButtons(
+        player2ColorGrid,
+        twoPlayerColors,
+        player2Color,
+        (color) => {
+
+            /*
+                Prevent Player 2 from selecting the
+                exact same color as Player 1.
+            */
+
+            if (color === playerColor) {
+                return;
+            }
+
+            player2Color = color;
+
+            updatePlayer2ColorPicker();
+
+        }
+    );
+
+
+    /*
+        Visually disable Player 1's color.
+    */
+
+    [...player2ColorGrid.children].forEach(
+        (button, index) => {
+
+            const color =
+                twoPlayerColors[index];
+
+            if (color.value === playerColor) {
+
+                button.classList.add("disabled");
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   MODE SELECTION
+========================================================= */
+
+document.querySelectorAll("[data-mode]").forEach((button) => {
+
+    button.addEventListener("click", () => {
+
+        gameMode =
+            Number(button.dataset.mode);
+
+
+        modeSelection.classList.add("hidden");
+
+
+        if (gameMode === 1) {
+
+            difficultySelection.classList.remove("hidden");
+
+            overlayText.textContent =
+                "Choose your AI difficulty.";
+
+        }
+
+        else {
+
+            /*
+                2P:
+                Let Player 1 pick first.
+            */
+
+            showPlayer1ColorSelection();
+
+        }
+
+    });
+
+});
+
+
+/* =========================================================
+   DIFFICULTY SELECTION
+========================================================= */
+
+document
+    .querySelectorAll("[data-difficulty]")
+    .forEach((button) => {
+
+        button.addEventListener("click", () => {
+
+            difficulty =
+                button.dataset.difficulty;
+
+            difficultySelection.classList.add("hidden");
+
+            /*
+                1P:
+                Player chooses their color.
+                AI will automatically be red.
+            */
+
+            showPlayer1ColorSelection();
+
+        });
+
+    });
+
+
+/* =========================================================
+   PLAYER 1 COLOR
+========================================================= */
+
+function showPlayer1ColorSelection() {
+
+    playerColorSelection.classList.remove("hidden");
+
+    player2ColorSelection.classList.add("hidden");
+
+    overlayTitle.textContent =
+        gameMode === 1
+            ? "Choose Your Color"
+            : "Player 1 — Choose Your Color";
+
+    overlayText.textContent =
+        gameMode === 1
+            ? "The AI will always use red."
+            : "Pick your paddle color.";
+
+    updatePlayerColorPicker();
+
+}
+
+
+confirmPlayerColor.addEventListener("click", () => {
+
+    player.color = playerColor;
+
+
+    if (gameMode === 1) {
+
+        /*
+            AI is ALWAYS red.
+        */
+
+        opponent.color = redColor.value;
+
+        playerColorSelection.classList.add("hidden");
+
+        startGame();
+
+        return;
+    }
+
+
+    /*
+        2P:
+        Move to Player 2 selection.
+    */
+
+    playerColorSelection.classList.add("hidden");
+
+    player2ColorSelection.classList.remove("hidden");
+
+    overlayTitle.textContent =
+        "Player 2";
+
+    overlayText.textContent =
+        "Choose a different color.";
+
+    /*
+        Default Player 2 color:
+        first available color.
+    */
+
+    if (!player2Color ||
+        player2Color === playerColor) {
+
+        player2Color =
+            twoPlayerColors.find(
+                color =>
+                    color.value !== playerColor
+            ).value;
+
+    }
+
+    updatePlayer2ColorPicker();
+
+});
+
+
+/* =========================================================
+   PLAYER 2 START
+========================================================= */
+
+startMatchButton.addEventListener("click", () => {
+
+    opponentColor = player2Color;
+
+    opponent.color = player2Color;
+
+    player2ColorSelection.classList.add("hidden");
+
+    startGame();
+
+});
+
+
+/* =========================================================
+   START GAME
+========================================================= */
+
+function startGame() {
+
+    playerScore = 0;
+    opponentScore = 0;
+
+    playerScoreElement.textContent = "0";
+    opponentScoreElement.textContent = "0";
+
+
+    player.y =
+        canvas.height / 2 -
+        player.height / 2;
+
+
+    opponent.y =
+        canvas.height / 2 -
+        opponent.height / 2;
+
+
+    player.color = playerColor;
+
+
+    if (gameMode === 1) {
+
+        opponent.color = redColor.value;
+
+    }
+
+    else {
+
+        opponent.color = player2Color;
+
+    }
+
+
+    running = true;
+
+    paused = false;
+
+    pauseButton.textContent = "Pause";
+
+
+    overlay.classList.add("hidden");
+
+
+    resetBall();
+
+
+    /*
+        Start with a countdown.
+    */
+
+    startCountdown();
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+async function startCountdown() {
+
+    countingDown = true;
+
+    ball.velocityX = 0;
+    ball.velocityY = 0;
+
+
+    const numbers = [
+        "3",
+        "2",
+        "1",
+        "GO!"
+    ];
+
+
+    for (const number of numbers) {
+
+        if (!running || paused) {
+            return;
+        }
+
+
+        countdownElement.textContent = number;
+
+        countdownElement.classList.remove("hidden");
+
+
+        /*
+            Restart animation.
+        */
+
+        countdownElement.style.animation = "none";
+
+        void countdownElement.offsetWidth;
+
+        countdownElement.style.animation =
+            "countdownPop 0.7s ease both";
+
+
+        await wait(700);
+
+    }
+
+
+    countdownElement.classList.add("hidden");
+
+
+    if (!running || paused) {
+        return;
+    }
+
+
+    countingDown = false;
+
+
+    serveBall();
+
+}
+
+
+function wait(ms) {
+
+    return new Promise(resolve =>
+        setTimeout(resolve, ms)
+    );
+
+}
+
+
+/* =========================================================
+   RESET BALL
+========================================================= */
+
+function resetBall() {
+
+    ball.x =
+        canvas.width / 2;
+
+    ball.y =
+        canvas.height / 2;
+
+
+    ball.velocityX = 0;
+    ball.velocityY = 0;
+
+
+    ballTrail.length = 0;
+
+}
+
+
+/* =========================================================
+   SERVE BALL
+========================================================= */
+
+function serveBall() {
+
+    ball.x =
+        canvas.width / 2;
+
+    ball.y =
+        canvas.height / 2;
+
+
+    ball.speed = 9;
+
+
+    /*
+        Random starting direction.
+    */
+
+    const direction =
+        Math.random() < 0.5
+            ? -1
+            : 1;
+
+
+    const angle =
+        (Math.random() * 0.8 - 0.4);
+
+
+    ball.velocityX =
+        direction *
+        ball.speed *
+        Math.cos(angle);
+
+
+    ball.velocityY =
+        ball.speed *
+        Math.sin(angle);
+
+
+    ballTrail.length = 0;
+
+}
+
+
+/* =========================================================
+   PLAYER MOVEMENT
+========================================================= */
+
+function updatePlayer() {
+
+    if (keys["w"]) {
+
+        player.y -= player.speed;
+
+    }
+
+
+    if (keys["s"]) {
+
+        player.y += player.speed;
+
+    }
+
+
+    player.y =
+        Math.max(
+            0,
+            Math.min(
+                canvas.height - player.height,
+                player.y
+            )
+        );
+
+}
+
+
+/* =========================================================
+   AI
+========================================================= */
+
+function updateAI() {
+
+    if (gameMode !== 1) {
+        return;
+    }
+
+
+    const settings =
+        difficulties[difficulty];
+
+
+    /*
+        IMPOSSIBLE AI
+
+        Predict exactly where the ball will hit
+        the AI paddle.
+
+        The paddle is placed directly at the
+        predicted collision point.
+
+        This makes Impossible genuinely impossible
+        to score against through normal ball movement.
+    */
+
+    if (difficulty === "impossible") {
+
+        if (ball.velocityX > 0) {
+
+            const distance =
+                opponent.x - ball.x;
+
+
+            const time =
+                distance / ball.velocityX;
+
+
+            let predictedY =
+                ball.y +
+                ball.velocityY * time;
+
+
+            /*
+                Reflect the predicted position
+                against the top/bottom walls.
+            */
+
+            const usableHeight =
+                canvas.height;
+
+
+            while (
+                predictedY < 0 ||
+                predictedY > usableHeight
+            ) {
+
+                if (predictedY < 0) {
+
+                    predictedY =
+                        -predictedY;
+
+                }
+
+                else if (
+                    predictedY > usableHeight
+                ) {
+
+                    predictedY =
+                        usableHeight -
+                        (predictedY - usableHeight);
+
+                }
+
+            }
+
+
+            opponent.y =
+                predictedY -
+                opponent.height / 2;
+
+        }
+
+        else {
+
+            /*
+                When the ball is traveling away,
+                return toward center.
+            */
+
+            opponent.y +=
+                (
+                    canvas.height / 2 -
+                    opponent.height / 2 -
+                    opponent.y
+                ) * 0.08;
+
+        }
+
+
+        opponent.y =
+            Math.max(
+                0,
+                Math.min(
+                    canvas.height - opponent.height,
+                    opponent.y
+                )
+            );
+
+
+        return;
+
+    }
+
+
+    /*
+        Normal AI.
+    */
+
+    let target =
+        ball.y -
+        opponent.height / 2;
+
+
+    /*
+        Add intentional error.
+    */
+
+    if (ball.velocityX > 0) {
+
+        target +=
+            Math.sin(
+                ball.x * 0.01
+            ) *
+            settings.error;
+
+    }
+
+
+    /*
+        Reaction factor.
+    */
+
+    const difference =
+        target - opponent.y;
+
+
+    opponent.y +=
+        difference *
+        0.055 *
+        settings.reaction;
+
+
+    /*
+        Maximum AI movement speed.
+    */
+
+    if (
+        Math.abs(difference) >
+        settings.speed
+    ) {
+
+        opponent.y +=
+            Math.sign(difference) *
+            settings.speed;
+
+    }
+
+
+    opponent.y =
+        Math.max(
+            0,
+            Math.min(
+                canvas.height - opponent.height,
+                opponent.y
+            )
+        );
+
+}
+
+
+/* =========================================================
+   BALL TRAIL
+========================================================= */
+
+function updateTrail() {
+
+    ballTrail.unshift({
+
+        x: ball.x,
+
+        y: ball.y,
+
+        radius: ball.radius
+
+    });
+
+
+    if (
+        ballTrail.length >
+        MAX_TRAIL_LENGTH
+    ) {
+
+        ballTrail.pop();
+
+    }
+
+}
+
+
+/* =========================================================
+   DRAW TRAIL
+========================================================= */
+
+function drawTrail() {
+
+    for (
+        let i = ballTrail.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const point =
+            ballTrail[i];
+
+
+        const progress =
+            1 -
+            i / ballTrail.length;
+
+
+        const alpha =
+            progress * 0.12;
+
+
+        const radius =
+            point.radius *
+            (0.45 + progress * 0.45);
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            point.x,
+            point.y,
+            radius,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.fillStyle =
+            `rgba(255,255,255,${alpha})`;
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================================================
+   BALL MOVEMENT
+========================================================= */
+
+function updateBall() {
+
+    ball.x += ball.velocityX;
+
+    ball.y += ball.velocityY;
+
+
+    /*
+        Top / bottom bounce.
+    */
+
+    if (
+        ball.y - ball.radius <= 0 ||
+        ball.y + ball.radius >= canvas.height
+    ) {
+
+        ball.velocityY *= -1;
+
+        ball.y =
+            Math.max(
+                ball.radius,
+                Math.min(
+                    canvas.height - ball.radius,
+                    ball.y
+                )
+            );
+
+    }
+
+
+    /*
+        Player paddle collision.
+    */
+
+    if (
+        ball.velocityX < 0 &&
+        ball.x - ball.radius <=
+            player.x + player.width &&
+        ball.x + ball.radius >=
+            player.x &&
+        ball.y >= player.y &&
+        ball.y <=
+            player.y + player.height
+    ) {
+
+        hitPaddle(player, 1);
+
+    }
+
+
+    /*
+        Opponent paddle collision.
+    */
+
+    if (
+        ball.velocityX > 0 &&
+        ball.x + ball.radius >=
+            opponent.x &&
+        ball.x - ball.radius <=
+            opponent.x + opponent.width &&
+        ball.y >= opponent.y &&
+        ball.y <=
+            opponent.y + opponent.height
+    ) {
+
+        hitPaddle(opponent, -1);
+
+    }
+
+
+    /*
+        Player missed.
+    */
+
+    if (ball.x < -30) {
+
+        opponentScore++;
+
+        opponentScoreElement.textContent =
+            opponentScore;
+
+        nextPoint(-1);
+
+    }
+
+
+    /*
+        Opponent missed.
+    */
+
+    if (
+        ball.x >
+        canvas.width + 30
+    ) {
+
+        playerScore++;
+
+        playerScoreElement.textContent =
+            playerScore;
+
+        nextPoint(1);
+
+    }
+
+}
+
+
+/* =========================================================
+   PADDLE HIT
+========================================================= */
+
+function hitPaddle(paddle, direction) {
+
+    /*
+        Where on the paddle was the ball hit?
+
+        -1 = top
+         0 = center
+         1 = bottom
+    */
+
+    const relativeHit =
+        (
+            ball.y -
+            (
+                paddle.y +
+                paddle.height / 2
+            )
+        ) /
+        (
+            paddle.height / 2
+        );
+
+
+    const maxAngle =
+        Math.PI / 3;
+
+
+    const angle =
+        relativeHit *
+        maxAngle;
+
+
+    ball.speed =
+        Math.min(
+            ball.speed + 0.45,
+            18
+        );
+
+
+    ball.velocityX =
+        direction *
+        ball.speed *
+        Math.cos(angle);
+
+
+    ball.velocityY =
+        ball.speed *
+        Math.sin(angle);
+
+
+    /*
+        Prevent the ball from getting stuck
+        inside the paddle.
+    */
+
+    if (direction === 1) {
+
+        ball.x =
+            paddle.x +
+            paddle.width +
+            ball.radius;
+
+    }
+
+    else {
+
+        ball.x =
+            paddle.x -
+            ball.radius;
+
+    }
+
+}
+
+
+/* =========================================================
+   NEXT POINT
+========================================================= */
+
+async function nextPoint(direction) {
+
+    if (playerScore >= 5) {
+
+        endGame("You Win!");
+
+        return;
+
+    }
+
+
+    if (opponentScore >= 5) {
+
+        endGame(
+            gameMode === 1
+                ? "AI Wins!"
+                : "Player 2 Wins!"
+        );
+
+        return;
+
+    }
+
+
+    resetBall();
+
+
+    /*
+        Small pause before the next serve.
+    */
+
+    await wait(500);
+
+
+    if (!running || paused) {
+        return;
+    }
+
+
+    startCountdown();
+
+}
+
+
+/* =========================================================
+   DRAW BACKGROUND
+========================================================= */
+
+function drawCourt() {
 
     ctx.clearRect(
         0,
@@ -245,9 +1351,33 @@ function draw() {
     );
 
 
-    /* Background */
+    /*
+        Court background.
+    */
 
-    ctx.fillStyle = "#07111f";
+    const gradient =
+        ctx.createRadialGradient(
+            canvas.width / 2,
+            canvas.height / 2,
+            50,
+            canvas.width / 2,
+            canvas.height / 2,
+            canvas.width
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#10253b"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#030911"
+    );
+
+
+    ctx.fillStyle = gradient;
 
     ctx.fillRect(
         0,
@@ -257,14 +1387,19 @@ function draw() {
     );
 
 
-    /* Center line */
+    /*
+        Center line.
+    */
+
+    ctx.setLineDash([
+        12,
+        18
+    ]);
 
     ctx.strokeStyle =
-        "rgba(255,255,255,0.10)";
+        "rgba(255,255,255,0.12)";
 
-    ctx.lineWidth = 2;
-
-    ctx.setLineDash([10, 14]);
+    ctx.lineWidth = 3;
 
     ctx.beginPath();
 
@@ -283,487 +1418,124 @@ function draw() {
     ctx.setLineDash([]);
 
 
-    /* Center circle */
-
-    ctx.strokeStyle =
-        "rgba(255,255,255,0.07)";
+    /*
+        Center circle.
+    */
 
     ctx.beginPath();
 
     ctx.arc(
         canvas.width / 2,
         canvas.height / 2,
-        65,
+        75,
         0,
         Math.PI * 2
     );
 
+    ctx.strokeStyle =
+        "rgba(255,255,255,0.08)";
+
+    ctx.lineWidth = 3;
+
     ctx.stroke();
 
+}
 
-    /* Paddles */
 
-    ctx.fillStyle = "#dcecff";
+/* =========================================================
+   DRAW PADDLE
+========================================================= */
 
-    ctx.fillRect(
-        player.x,
-        player.y,
-        player.width,
-        player.height
+function drawPaddle(paddle) {
+
+    /*
+        Soft glow.
+    */
+
+    ctx.shadowColor =
+        paddle.color;
+
+    ctx.shadowBlur = 18;
+
+
+    /*
+        Main paddle.
+    */
+
+    ctx.fillStyle =
+        paddle.color;
+
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        paddle.x,
+        paddle.y,
+        paddle.width,
+        paddle.height,
+        9
     );
 
-    ctx.fillRect(
-        opponent.x,
-        opponent.y,
-        opponent.width,
-        opponent.height
-    );
+    ctx.fill();
 
 
-    /* Ball */
+    /*
+        Reset shadow.
+    */
+
+    ctx.shadowBlur = 0;
+
+}
+
+
+/* =========================================================
+   DRAW BALL
+========================================================= */
+
+function drawBall() {
+
+    ctx.shadowColor =
+        "rgba(255,255,255,0.8)";
+
+    ctx.shadowBlur = 18;
+
 
     ctx.beginPath();
 
     ctx.arc(
         ball.x,
         ball.y,
-        ball.size / 2,
+        ball.radius,
         0,
         Math.PI * 2
     );
 
-    ctx.fillStyle = "#ffffff";
+
+    ctx.fillStyle = "#FFFFFF";
 
     ctx.fill();
 
-}
 
-
-/* =========================================================
-   RESET
-========================================================= */
-
-function resetPositions() {
-
-    player.y =
-        canvas.height / 2 -
-        player.height / 2;
-
-    opponent.y =
-        canvas.height / 2 -
-        opponent.height / 2;
-
-}
-
-
-function resetBall(direction) {
-
-    ball.x =
-        canvas.width / 2;
-
-    ball.y =
-        canvas.height / 2;
-
-    ball.speed = 7;
-
-    ball.velocityX =
-        direction * ball.speed;
-
-    ball.velocityY =
-        (Math.random() * 5) - 2.5;
-
-    aiTargetY =
-        canvas.height / 2;
+    ctx.shadowBlur = 0;
 
 }
 
 
 /* =========================================================
-   PLAYER 1
+   DRAW
 ========================================================= */
 
-function updatePlayer() {
+function draw() {
 
-    if (keys["w"]) {
+    drawCourt();
 
-        player.y -= player.speed;
+    drawTrail();
 
-    }
+    drawPaddle(player);
 
-    if (keys["s"]) {
+    drawPaddle(opponent);
 
-        player.y += player.speed;
-
-    }
-
-    clampPaddle(player);
-
-}
-
-
-/* =========================================================
-   PLAYER 2
-========================================================= */
-
-function updateSecondPlayer() {
-
-    if (keys["arrowup"]) {
-
-        opponent.y -=
-            SECOND_PLAYER_SPEED;
-
-    }
-
-    if (keys["arrowdown"]) {
-
-        opponent.y +=
-            SECOND_PLAYER_SPEED;
-
-    }
-
-    clampPaddle(opponent);
-
-}
-
-
-/* =========================================================
-   AI
-========================================================= */
-
-function updateAI() {
-
-    const settings =
-        difficulties[selectedDifficulty];
-
-
-    /*
-        Impossible tracks the ball
-        perfectly.
-    */
-
-    if (
-        selectedDifficulty ===
-        "impossible"
-    ) {
-
-        aiTargetY =
-            ball.y -
-            opponent.height / 2;
-
-    }
-
-    else {
-
-        /*
-            Only update the target when
-            the ball is moving toward AI.
-        */
-
-        if (ball.velocityX > 0) {
-
-            const target =
-                ball.y -
-                opponent.height / 2;
-
-            aiTargetY =
-                target +
-                aiErrorOffset;
-
-        }
-
-        else {
-
-            aiTargetY =
-                canvas.height / 2 -
-                opponent.height / 2;
-
-        }
-
-    }
-
-
-    const difference =
-        aiTargetY -
-        opponent.y;
-
-
-    const movement =
-        Math.sign(difference) *
-        Math.min(
-            Math.abs(difference),
-            settings.speed
-        );
-
-
-    /*
-        Reaction factor makes lower
-        difficulties respond less accurately.
-    */
-
-    opponent.y +=
-        movement *
-        settings.reaction;
-
-
-    clampPaddle(opponent);
-
-
-    /*
-        Occasionally create a new
-        prediction error.
-    */
-
-    if (
-        selectedDifficulty !==
-        "impossible" &&
-        Math.random() < 0.015
-    ) {
-
-        aiErrorOffset =
-            (
-                Math.random() * 2 - 1
-            ) *
-            settings.error;
-
-    }
-
-}
-
-
-/* =========================================================
-   CLAMP PADDLE
-========================================================= */
-
-function clampPaddle(paddle) {
-
-    paddle.y = Math.max(
-        0,
-        Math.min(
-            canvas.height -
-                paddle.height,
-            paddle.y
-        )
-    );
-
-}
-
-
-/* =========================================================
-   COLLISION
-========================================================= */
-
-function paddleCollision(paddle) {
-
-    return (
-
-        ball.x - ball.size / 2 <
-            paddle.x +
-            paddle.width &&
-
-        ball.x + ball.size / 2 >
-            paddle.x &&
-
-        ball.y - ball.size / 2 <
-            paddle.y +
-            paddle.height &&
-
-        ball.y + ball.size / 2 >
-            paddle.y
-
-    );
-
-}
-
-
-/* =========================================================
-   BOUNCE
-========================================================= */
-
-function bounceFromPaddle(paddle) {
-
-    const center =
-        paddle.y +
-        paddle.height / 2;
-
-    const difference =
-        ball.y - center;
-
-    const normalized =
-        difference /
-        (paddle.height / 2);
-
-    const maxAngle =
-        Math.PI / 3;
-
-    const angle =
-        normalized * maxAngle;
-
-
-    ball.speed =
-        Math.min(
-            ball.speed + 0.45,
-            18
-        );
-
-
-    const direction =
-        ball.velocityX > 0
-            ? -1
-            : 1;
-
-
-    ball.velocityX =
-        Math.cos(angle) *
-        ball.speed *
-        direction;
-
-    ball.velocityY =
-        Math.sin(angle) *
-        ball.speed;
-
-}
-
-
-/* =========================================================
-   BALL
-========================================================= */
-
-function updateBall() {
-
-    ball.x += ball.velocityX;
-
-    ball.y += ball.velocityY;
-
-
-    /* Top / bottom */
-
-    if (
-        ball.y -
-            ball.size / 2 <= 0 ||
-
-        ball.y +
-            ball.size / 2 >=
-            canvas.height
-    ) {
-
-        ball.velocityY *= -1;
-
-    }
-
-
-    /* Player */
-
-    if (
-        ball.velocityX < 0 &&
-        paddleCollision(player)
-    ) {
-
-        ball.x =
-            player.x +
-            player.width +
-            ball.size / 2;
-
-        bounceFromPaddle(player);
-
-    }
-
-
-    /* Opponent */
-
-    if (
-        ball.velocityX > 0 &&
-        paddleCollision(opponent)
-    ) {
-
-        ball.x =
-            opponent.x -
-            ball.size / 2;
-
-        bounceFromPaddle(opponent);
-
-    }
-
-
-    /* Left score */
-
-    if (ball.x < -ball.size) {
-
-        aiScore++;
-
-        updateScore();
-
-        if (checkWinner()) {
-            return;
-        }
-
-        resetBall(1);
-
-    }
-
-
-    /* Right score */
-
-    if (
-        ball.x >
-        canvas.width + ball.size
-    ) {
-
-        playerScore++;
-
-        updateScore();
-
-        if (checkWinner()) {
-            return;
-        }
-
-        resetBall(-1);
-
-    }
-
-}
-
-
-/* =========================================================
-   SCORE
-========================================================= */
-
-function updateScore() {
-
-    playerScoreElement.textContent =
-        playerScore;
-
-    aiScoreElement.textContent =
-        aiScore;
-
-}
-
-
-/* =========================================================
-   WINNER
-========================================================= */
-
-function checkWinner() {
-
-    if (
-        playerScore >= WIN_SCORE ||
-        aiScore >= WIN_SCORE
-    ) {
-
-        endGame(
-            playerScore >= WIN_SCORE
-                ? "You Win!"
-                : (
-                    gameMode === "2p"
-                        ? "Player 2 Wins!"
-                        : "AI Wins!"
-                )
-        );
-
-        return true;
-
-    }
-
-    return false;
+    drawBall();
 
 }
 
@@ -775,260 +1547,28 @@ function checkWinner() {
 function gameLoop() {
 
     if (
-        gameRunning &&
-        !paused
+        running &&
+        !paused &&
+        !countingDown
     ) {
 
         updatePlayer();
 
-        if (gameMode === "1p") {
-
-            updateAI();
-
-        }
-
-        else {
-
-            updateSecondPlayer();
-
-        }
+        updateAI();
 
         updateBall();
 
+        updateTrail();
+
     }
 
+
     draw();
+
 
     requestAnimationFrame(gameLoop);
 
 }
-
-
-/* =========================================================
-   MODE SELECTION
-========================================================= */
-
-onePlayerButton.addEventListener(
-    "click",
-    () => {
-
-        gameMode = "1p";
-
-        modeSelection.classList.add(
-            "hidden"
-        );
-
-        difficultySelection.classList.remove(
-            "hidden"
-        );
-
-        overlayTitle.textContent =
-            "Choose Difficulty";
-
-        overlayText.textContent =
-            "How good should the AI be?";
-
-    }
-);
-
-
-twoPlayerButton.addEventListener(
-    "click",
-    () => {
-
-        gameMode = "2p";
-
-        setupTwoPlayer();
-
-        beginGame();
-
-    }
-);
-
-
-backToModes.addEventListener(
-    "click",
-    () => {
-
-        difficultySelection.classList.add(
-            "hidden"
-        );
-
-        modeSelection.classList.remove(
-            "hidden"
-        );
-
-        overlayTitle.textContent =
-            "Pong";
-
-        overlayText.textContent =
-            "Choose how you want to play.";
-
-    }
-);
-
-
-/* =========================================================
-   DIFFICULTY SELECTION
-========================================================= */
-
-document
-    .querySelectorAll(".difficulty-button")
-    .forEach((button) => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                selectedDifficulty =
-                    button.dataset.difficulty;
-
-                setupOnePlayer();
-
-                beginGame();
-
-            }
-        );
-
-    });
-
-
-/* =========================================================
-   MODE SETUP
-========================================================= */
-
-function setupOnePlayer() {
-
-    leftPlayerLabel.textContent =
-        "YOU";
-
-    rightPlayerLabel.textContent =
-        "AI";
-
-    leftControls.classList.remove(
-        "hidden-control"
-    );
-
-    rightControls.classList.add(
-        "hidden-control"
-    );
-
-}
-
-
-function setupTwoPlayer() {
-
-    leftPlayerLabel.textContent =
-        "PLAYER 1";
-
-    rightPlayerLabel.textContent =
-        "PLAYER 2";
-
-    leftControls.classList.remove(
-        "hidden-control"
-    );
-
-    rightControls.classList.remove(
-        "hidden-control"
-    );
-
-}
-
-
-/* =========================================================
-   BEGIN GAME
-========================================================= */
-
-function beginGame() {
-
-    playerScore = 0;
-
-    aiScore = 0;
-
-    updateScore();
-
-    resetPositions();
-
-    resetBall(
-        Math.random() > 0.5
-            ? 1
-            : -1
-    );
-
-    gameRunning = true;
-
-    paused = false;
-
-    pauseButton.textContent =
-        "Pause";
-
-    overlay.style.display =
-        "none";
-
-}
-
-
-/* =========================================================
-   END GAME
-========================================================= */
-
-function endGame(message) {
-
-    gameRunning = false;
-
-    paused = false;
-
-    overlayTitle.textContent =
-        message;
-
-    overlayText.textContent =
-        `${playerScore} — ${aiScore}`;
-
-    modeSelection.classList.add(
-        "hidden"
-    );
-
-    difficultySelection.classList.add(
-        "hidden"
-    );
-
-    startButton.classList.remove(
-        "hidden"
-    );
-
-    startButton.textContent =
-        "Play Again";
-
-    overlay.style.display =
-        "grid";
-
-}
-
-
-/* =========================================================
-   START BUTTON
-========================================================= */
-
-startButton.addEventListener(
-    "click",
-    () => {
-
-        startButton.classList.add(
-            "hidden"
-        );
-
-        modeSelection.classList.remove(
-            "hidden"
-        );
-
-        overlayTitle.textContent =
-            "Pong";
-
-        overlayText.textContent =
-            "Choose how you want to play.";
-
-    }
-);
 
 
 /* =========================================================
@@ -1037,50 +1577,53 @@ startButton.addEventListener(
 
 function togglePause() {
 
-    if (!gameRunning) {
+    if (!running || countingDown) {
         return;
     }
+
 
     paused = !paused;
 
 
     if (paused) {
 
+        pauseButton.textContent =
+            "Resume";
+
+
+        overlay.classList.remove("hidden");
+
         overlayTitle.textContent =
             "Paused";
 
         overlayText.textContent =
-            "The game is paused.";
+            "Take a breather.";
 
-        modeSelection.classList.add(
-            "hidden"
-        );
+        modeSelection.classList.add("hidden");
 
-        difficultySelection.classList.add(
-            "hidden"
-        );
+        difficultySelection.classList.add("hidden");
 
-        startButton.classList.remove(
-            "hidden"
-        );
+        playerColorSelection.classList.add("hidden");
+
+        player2ColorSelection.classList.add("hidden");
+
+        startButton.classList.remove("hidden");
 
         startButton.textContent =
             "Resume";
 
-        overlay.style.display =
-            "grid";
-
-        return;
-
     }
 
+    else {
 
-    overlay.style.display =
-        "none";
+        overlay.classList.add("hidden");
 
-    startButton.classList.add(
-        "hidden"
-    );
+        startButton.classList.add("hidden");
+
+        pauseButton.textContent =
+            "Pause";
+
+    }
 
 }
 
@@ -1092,46 +1635,109 @@ pauseButton.addEventListener(
 
 
 /* =========================================================
-   MOBILE CONTROLS
+   END GAME
 ========================================================= */
 
-const upButton =
-    document.getElementById("upButton");
+function endGame(message) {
 
-const downButton =
-    document.getElementById("downButton");
+    running = false;
+
+    paused = false;
+
+    countingDown = false;
 
 
-function movePlayer(amount) {
+    countdownElement.classList.add("hidden");
 
-    player.y += amount;
 
-    clampPaddle(player);
+    overlay.classList.remove("hidden");
+
+
+    overlayTitle.textContent =
+        message;
+
+
+    overlayText.textContent =
+        `Final Score: ${playerScore} - ${opponentScore}`;
+
+
+    modeSelection.classList.add("hidden");
+
+    difficultySelection.classList.add("hidden");
+
+    playerColorSelection.classList.add("hidden");
+
+    player2ColorSelection.classList.add("hidden");
+
+
+    startButton.classList.remove("hidden");
+
+    startButton.textContent =
+        "Play Again";
+
+
+    pauseButton.textContent =
+        "Pause";
 
 }
 
 
-upButton.addEventListener(
-    "pointerdown",
-    () => movePlayer(-45)
-);
+/* =========================================================
+   PLAY AGAIN
+========================================================= */
+
+startButton.addEventListener("click", () => {
+
+    /*
+        If this is actually the pause screen,
+        resume instead of reopening setup.
+    */
+
+    if (paused) {
+
+        paused = false;
+
+        overlay.classList.add("hidden");
+
+        startButton.classList.add("hidden");
+
+        pauseButton.textContent =
+            "Pause";
+
+        return;
+
+    }
 
 
-downButton.addEventListener(
-    "pointerdown",
-    () => movePlayer(45)
-);
+    startButton.classList.add("hidden");
+
+    modeSelection.classList.remove("hidden");
+
+    difficultySelection.classList.add("hidden");
+
+    playerColorSelection.classList.add("hidden");
+
+    player2ColorSelection.classList.add("hidden");
+
+
+    overlayTitle.textContent =
+        "Pong";
+
+    overlayText.textContent =
+        "Choose how you want to play.";
+
+});
 
 
 /* =========================================================
    INITIALIZE
 ========================================================= */
 
-setupOnePlayer();
+player.color =
+    playerColor;
 
-resetPositions();
-
-resetBall(1);
+opponent.color =
+    redColor.value;
 
 draw();
 
