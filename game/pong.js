@@ -810,12 +810,16 @@ function serveBall() {
 
 function updatePlayer() {
 
+    /*
+        PLAYER 1
+        W / S
+    */
+
     if (keys["w"]) {
 
         player.y -= player.speed;
 
     }
-
 
     if (keys["s"]) {
 
@@ -823,6 +827,10 @@ function updatePlayer() {
 
     }
 
+
+    /*
+        PLAYER 1 BOUNDARIES
+    */
 
     player.y =
         Math.max(
@@ -833,8 +841,45 @@ function updatePlayer() {
             )
         );
 
-}
 
+    /*
+        PLAYER 2
+        Arrow Up / Arrow Down
+
+        Only active during 2 Player mode.
+    */
+
+    if (gameMode === 2) {
+
+        if (keys["arrowup"]) {
+
+            opponent.y -= opponent.speed;
+
+        }
+
+        if (keys["arrowdown"]) {
+
+            opponent.y += opponent.speed;
+
+        }
+
+
+        /*
+            PLAYER 2 BOUNDARIES
+        */
+
+        opponent.y =
+            Math.max(
+                0,
+                Math.min(
+                    canvas.height - opponent.height,
+                    opponent.y
+                )
+            );
+
+    }
+
+}
 
 /* =========================================================
    AI
@@ -1554,8 +1599,10 @@ function gameLoop() {
 
         updatePlayer();
 
-        updateAI();
-
+        if (gameMode === 1) {
+             updateAI();
+        }
+         
         updateBall();
 
         updateTrail();
