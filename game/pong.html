@@ -1,1 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pong - MiniGame Hub</title>
+
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="pong.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+</head>
+
+
+<body class="game-page">
+
+
+<header class="game-navbar">
+
+    <a href="../index.html" class="back-button">
+        ← Hub
+    </a>
+
+    <div class="game-title">
+        <span>🏓</span>
+        Pong
+    </div>
+
+    <button class="pause-button" id="pauseButton">
+        Pause
+    </button>
+
+</header>
+
+
+<main class="pong-container">
+
+
+    <!-- SCORE -->
+
+    <div class="scoreboard">
+
+        <div class="score-player">
+
+            <span class="score-label">
+                YOU
+            </span>
+
+            <span id="playerScore">
+                0
+            </span>
+
+        </div>
+
+
+        <div class="score-divider">
+            :
+        </div>
+
+
+        <div class="score-player">
+
+            <span class="score-label">
+                AI
+            </span>
+
+            <span id="aiScore">
+                0
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- GAME -->
+
+    <div class="pong-wrapper">
+
+        <canvas
+            id="pongCanvas"
+            width="900"
+            height="500"
+        ></canvas>
+
+
+        <div class="game-overlay" id="gameOverlay">
+
+            <div class="overlay-content">
+
+                <span class="overlay-icon">
+                    🏓
+                </span>
+
+                <h1 id="overlayTitle">
+                    Pong
+                </h1>
+
+                <p id="overlayText">
+                    First to 5 wins.
+                </p>
+
+                <button
+                    class="game-button"
+                    id="startButton"
+                >
+                    Start Game
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+        <div>
+            <strong>W / S</strong>
+            <span>Move</span>
+        </div>
+
+        <div>
+            <strong>SPACE</strong>
+            <span>Pause</span>
+        </div>
+
+    </div>
+
+
+    <!-- MOBILE -->
+
+    <div class="mobile-controls">
+
+        <button id="upButton">
+            ▲
+        </button>
+
+        <button id="downButton">
+            ▼
+        </button>
+
+    </div>
+
+
+</main>
+
+
+<script src="pong.js"></script>
+
+</body>
+
+</html>
