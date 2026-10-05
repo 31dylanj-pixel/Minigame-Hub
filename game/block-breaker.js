@@ -143,6 +143,43 @@ let powerups = [];
 
 let particles = [];
 
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+let countdownActive = false;
+let countdownValue = 3;
+
+function startCountdown(callback) {
+
+    countdownActive = true;
+    countdownValue = 3;
+
+    const countdownInterval = setInterval(() => {
+
+        countdownValue--;
+
+        if (countdownValue <= 0) {
+
+            countdownValue = "GO!";
+
+        }
+
+        if (countdownValue === "GO!") {
+
+            setTimeout(() => {
+
+                clearInterval(countdownInterval);
+
+                countdownActive = false;
+
+                callback();
+
+            }, 450);
+        }
+
+    }, 800);
+}
 
 /* =========================================================
    BLOCKS
@@ -156,7 +193,7 @@ const BLOCK_HEIGHT = 32;
 
 const BLOCK_GAP = 10;
 
-const BLOCK_ROWS = 6;
+const BLOCK_ROWS = 4;
 
 const BLOCK_COLS = 10;
 
@@ -368,6 +405,10 @@ function startGame() {
 
     levelTransition = false;
 
+    countdownActive = false;
+
+    countdownValue = 3;
+
     paddle.normalWidth = 150;
 
     paddle.width = 150;
@@ -400,8 +441,17 @@ function startGame() {
     lastTime = performance.now();
 
     requestAnimationFrame(gameLoop);
-}
 
+    /*
+        Start the round with a countdown.
+    */
+
+    startCountdown(() => {
+
+        countdownActive = false;
+
+    });
+}
 
 /* =========================================================
    GAME OVER
@@ -451,9 +501,19 @@ function nextLevel() {
 
         levelTransition = false;
 
+        /*
+            Countdown before the
+            new level begins.
+        */
+
+        startCountdown(() => {
+
+            countdownActive = false;
+
+        });
+
     }, 800);
 }
-
 
 /* =========================================================
    LEVEL MESSAGE
@@ -2309,8 +2369,65 @@ function draw() {
     drawBalls();
 
     drawParticles();
-}
 
+
+    /*
+        COUNTDOWN OVERLAY
+    */
+
+    if (countdownActive) {
+
+        ctx.save();
+
+        /*
+            Darken the game slightly
+            while counting down.
+        */
+
+        ctx.fillStyle =
+            "rgba(0, 0, 0, 0.42)";
+
+        ctx.fillRect(
+            0,
+            0,
+            WIDTH,
+            HEIGHT
+        );
+
+
+        /*
+            Countdown number
+        */
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+        ctx.font =
+            '900 110px "Montserrat", sans-serif';
+
+        ctx.fillStyle =
+            "#FFFFFF";
+
+        ctx.shadowColor =
+            "rgba(255,255,255,0.55)";
+
+        ctx.shadowBlur =
+            30;
+
+
+        ctx.fillText(
+            countdownValue,
+            WIDTH / 2,
+            HEIGHT / 2
+        );
+
+
+        ctx.restore();
+    }
+}
 
 /* =========================================================
    GAME LOOP
@@ -2340,25 +2457,27 @@ function gameLoop(timestamp) {
 
 
     updatePaddle(
-        delta
+       delta
     );
-
+   
     updateExtend(
-        delta
+       delta
     );
-
-    updateBalls(
-        delta
-    );
-
-    updatePowerups(
-        delta
-    );
-
-    updateParticles(
-        delta
-    );
-
+   
+    if (!countdownActive) {
+   
+       updateBalls(
+           delta
+       );
+   
+       updatePowerups(
+           delta
+       );
+    }
+   
+   updateParticles(
+       delta
+   );
 
     draw();
 
