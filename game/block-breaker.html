@@ -1,1 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Block Breaker | MiniGame Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="block-breaker.css">
+</head>
+
+<body>
+
+    <main class="game-page">
+
+        <header class="game-header">
+
+            <a href="../index.html" class="back-button">
+                ← Back
+            </a>
+
+            <div class="title-area">
+                <h1>Block Breaker</h1>
+                <p>Break the blocks. Catch the powerups. Keep the ball alive.</p>
+            </div>
+
+        </header>
+
+
+        <!-- HUD -->
+
+        <section class="hud">
+
+            <div class="hud-item">
+                <span>Score</span>
+                <strong id="score">0</strong>
+            </div>
+
+            <div class="hud-item">
+                <span>Level</span>
+                <strong id="level">1</strong>
+            </div>
+
+            <div class="hud-item">
+                <span>Lives</span>
+                <strong id="lives">3</strong>
+            </div>
+
+            <div class="powerup-status" id="powerupStatus">
+
+                <div class="status-label">
+                    <span id="powerupName">No Powerup</span>
+                    <strong id="powerupTimer"></strong>
+                </div>
+
+                <div class="timer-track">
+                    <div id="timerFill"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- GAME -->
+
+        <section class="game-shell">
+
+            <canvas
+                id="gameCanvas"
+                width="1200"
+                height="700">
+            </canvas>
+
+            <div class="level-message" id="levelMessage">
+                Level 1
+            </div>
+
+            <div class="game-overlay hidden" id="gameOverlay">
+
+                <div class="overlay-card">
+
+                    <div class="overlay-icon">💥</div>
+
+                    <h2 id="overlayTitle">
+                        Game Over
+                    </h2>
+
+                    <p id="overlayText">
+                        You ran out of lives.
+                    </p>
+
+                    <div class="final-score">
+                        Score
+                        <strong id="finalScore">0</strong>
+                    </div>
+
+                    <button id="restartButton">
+                        Play Again
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONTROLS -->
+
+        <section class="controls">
+
+            <div class="control-card">
+
+                <span class="control-title">
+                    Keyboard
+                </span>
+
+                <div class="keys">
+                    <kbd>A</kbd>
+                    <kbd>D</kbd>
+                    <span>or</span>
+                    <kbd>←</kbd>
+                    <kbd>→</kbd>
+                </div>
+
+            </div>
+
+            <div class="control-card">
+
+                <span class="control-title">
+                    Other Controls
+                </span>
+
+                <p>
+                    Move your mouse or drag on the screen
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="block-breaker.js"></script>
+
+</body>
+</html>
