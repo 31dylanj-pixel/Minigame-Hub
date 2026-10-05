@@ -1,0 +1,763 @@
+/* =========================================================
+   BLOCK BREAKER
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    background:
+        radial-gradient(
+            circle at top,
+            rgba(30, 90, 150, 0.18),
+            transparent 40%
+        ),
+        linear-gradient(
+            145deg,
+            #050b13,
+            #071421 50%,
+            #03070d
+        );
+
+    color: white;
+
+    font-family: "Poppins", sans-serif;
+
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.game-page {
+
+    width: min(1500px, 96vw);
+
+    min-height: 100vh;
+
+    margin: 0 auto;
+
+    padding:
+        28px
+        0
+        50px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.game-header {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 24px;
+
+    margin-bottom: 22px;
+}
+
+.back-button {
+
+    flex-shrink: 0;
+
+    text-decoration: none;
+
+    color: rgba(255,255,255,0.75);
+
+    background:
+        rgba(255,255,255,0.05);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    padding:
+        11px
+        17px;
+
+    border-radius: 12px;
+
+    font-size: 14px;
+
+    transition:
+        0.2s ease;
+}
+
+.back-button:hover {
+
+    color: white;
+
+    background:
+        rgba(255,255,255,0.09);
+
+    transform:
+        translateY(-1px);
+}
+
+.title-area {
+
+    flex: 1;
+
+    text-align: center;
+
+    margin-right: 95px;
+}
+
+.title-area h1 {
+
+    margin: 0;
+
+    font-family:
+        "Montserrat",
+        sans-serif;
+
+    font-size:
+        clamp(32px, 4vw, 48px);
+
+    font-weight: 800;
+
+    letter-spacing: -1.5px;
+}
+
+.title-area p {
+
+    margin:
+        7px
+        0
+        0;
+
+    color:
+        rgba(255,255,255,0.55);
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   HUD
+========================================================= */
+
+.hud {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: stretch;
+
+    gap: 12px;
+
+    margin-bottom: 14px;
+}
+
+.hud-item {
+
+    min-width: 115px;
+
+    padding:
+        12px
+        18px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.045);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    backdrop-filter:
+        blur(12px);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+}
+
+.hud-item span {
+
+    color:
+        rgba(255,255,255,0.45);
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.3px;
+}
+
+.hud-item strong {
+
+    margin-top: 2px;
+
+    font-family:
+        "Montserrat",
+        sans-serif;
+
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   POWERUP STATUS
+========================================================= */
+
+.powerup-status {
+
+    flex: 1;
+
+    min-width: 180px;
+
+    padding:
+        12px
+        18px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.045);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+}
+
+.status-label {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    font-size: 12px;
+
+    color:
+        rgba(255,255,255,0.55);
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+.status-label strong {
+
+    color: white;
+
+    font-family:
+        "Montserrat",
+        sans-serif;
+
+    font-size: 13px;
+}
+
+.timer-track {
+
+    width: 100%;
+
+    height: 5px;
+
+    margin-top: 9px;
+
+    background:
+        rgba(255,255,255,0.07);
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+#timerFill {
+
+    width: 0%;
+
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #40E0D0,
+            #38BDF8
+        );
+
+    transition:
+        width 0.1s linear;
+}
+
+
+/* =========================================================
+   GAME SHELL
+========================================================= */
+
+.game-shell {
+
+    position: relative;
+
+    width: 100%;
+
+    border-radius: 22px;
+
+    overflow: hidden;
+
+    background:
+        #03080f;
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+        0 30px 90px rgba(0,0,0,0.5),
+        inset 0 0 40px rgba(0,0,0,0.25);
+}
+
+canvas {
+
+    display: block;
+
+    width: 100%;
+
+    height: auto;
+
+    aspect-ratio: 1200 / 700;
+
+    touch-action: none;
+
+    cursor: none;
+}
+
+
+/* =========================================================
+   LEVEL MESSAGE
+========================================================= */
+
+.level-message {
+
+    position: absolute;
+
+    top: 50%;
+
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%)
+        scale(0.8);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    font-family:
+        "Montserrat",
+        sans-serif;
+
+    font-size:
+        clamp(34px, 6vw, 68px);
+
+    font-weight: 800;
+
+    letter-spacing: -2px;
+
+    text-shadow:
+        0 0 30px rgba(255,255,255,0.35);
+
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+}
+
+.level-message.show {
+
+    opacity: 1;
+
+    transform:
+        translate(-50%, -50%)
+        scale(1);
+}
+
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.game-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(2,7,13,0.72);
+
+    backdrop-filter:
+        blur(9px);
+
+    z-index: 20;
+
+    opacity: 1;
+
+    transition:
+        opacity 0.25s ease;
+}
+
+.game-overlay.hidden {
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+.overlay-card {
+
+    width:
+        min(390px, 90%);
+
+    padding:
+        34px;
+
+    text-align: center;
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20,35,52,0.96),
+            rgba(7,16,27,0.96)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.1);
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,0.5);
+}
+
+.overlay-icon {
+
+    font-size: 46px;
+
+    margin-bottom: 10px;
+}
+
+.overlay-card h2 {
+
+    margin:
+        0 0 8px;
+
+    font-family:
+        "Montserrat",
+        sans-serif;
+
+    font-size: 30px;
+}
+
+.overlay-card p {
+
+    margin:
+        0 0 22px;
+
+    color:
+        rgba(255,255,255,0.55);
+}
+
+.final-score {
+
+    color:
+        rgba(255,255,255,0.5);
+
+    font-size: 12px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.5px;
+}
+
+.final-score strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: white;
+
+    font-family:
+        "Montserrat",
+        sans-serif;
+
+    font-size: 32px;
+}
+
+.overlay-card button {
+
+    width: 100%;
+
+    margin-top: 24px;
+
+    padding: 14px;
+
+    border: 0;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #38BDF8,
+            #4169E1
+        );
+
+    color: white;
+
+    font-family:
+        "Montserrat",
+        sans-serif;
+
+    font-weight: 700;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition:
+        0.2s ease;
+}
+
+.overlay-card button:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 10px 30px rgba(65,105,225,0.3);
+}
+
+
+/* =========================================================
+   CONTROLS
+========================================================= */
+
+.controls {
+
+    width: 100%;
+
+    display: flex;
+
+    gap: 12px;
+
+    margin-top: 14px;
+}
+
+.control-card {
+
+    flex: 1;
+
+    padding:
+        15px
+        18px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.035);
+
+    border:
+        1px solid rgba(255,255,255,0.06);
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.control-title {
+
+    color:
+        rgba(255,255,255,0.45);
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+    white-space: nowrap;
+}
+
+.control-card p {
+
+    margin: 0;
+
+    color:
+        rgba(255,255,255,0.55);
+
+    font-size: 12px;
+}
+
+.keys {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+}
+
+kbd {
+
+    min-width: 30px;
+
+    height: 30px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background:
+        rgba(255,255,255,0.07);
+
+    border:
+        1px solid rgba(255,255,255,0.1);
+
+    font-family:
+        "Montserrat",
+        sans-serif;
+
+    font-size: 11px;
+}
+
+.keys span {
+
+    color:
+        rgba(255,255,255,0.35);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .game-page {
+
+        width: 94vw;
+
+        padding-top: 18px;
+    }
+
+    .game-header {
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .back-button {
+
+        width: fit-content;
+    }
+
+    .title-area {
+
+        margin-right: 0;
+
+        text-align: center;
+    }
+
+    .hud {
+
+        flex-wrap: wrap;
+    }
+
+    .hud-item {
+
+        flex: 1;
+
+        min-width: 0;
+    }
+
+    .powerup-status {
+
+        flex-basis: 100%;
+    }
+
+    .controls {
+
+        flex-direction: column;
+    }
+
+    .control-card {
+
+        justify-content: center;
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .game-page {
+
+        width: 96vw;
+    }
+
+    .hud-item {
+
+        padding:
+            10px
+            12px;
+    }
+
+    .hud-item strong {
+
+        font-size: 18px;
+    }
+
+    .control-card {
+
+        flex-direction: column;
+
+        gap: 8px;
+    }
+
+}
