@@ -414,7 +414,7 @@ body {
 
 .tile.new-tile {
     animation:
-        tileAppear 100ms
+        tileAppear 90ms
         cubic-bezier(
             0.22,
             1,
@@ -430,7 +430,7 @@ body {
 
 .tile.merged {
     animation:
-        tileMerge 110ms
+        tileMerge 90ms
         cubic-bezier(
             0.22,
             1,
@@ -438,7 +438,6 @@ body {
             1
         );
 }
-
 
 @keyframes tileAppear {
 
