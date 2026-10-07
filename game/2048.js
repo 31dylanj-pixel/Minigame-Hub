@@ -60,7 +60,7 @@ const SIZE = 4;
     Keep this short so the game feels responsive.
 */
 
-const MOVE_TIME = 145;
+const MOVE_TIME = 45;
 
 
 /* =========================================================
@@ -585,13 +585,8 @@ document.addEventListener(
     "keydown",
     (event) => {
 
-        if (
-            gameEnded ||
-            isAnimating
-        ) {
-
-            return;
-
+        if (gameEnded) {
+             return;
         }
 
 
@@ -676,15 +671,6 @@ document.addEventListener(
 ========================================================= */
 
 function move(direction) {
-
-    if (
-        isAnimating
-    ) {
-
-        return;
-
-    }
-
 
     const previousBoard =
         board.map(
@@ -893,46 +879,37 @@ function move(direction) {
         before allowing another move.
     */
 
-    setTimeout(
-        () => {
+    isAnimating = false;
 
-            isAnimating = false;
-
-
-            /*
-                Check for 2048.
-            */
-
-            if (
-                !hasReached2048 &&
-                contains2048()
-            ) {
-
-                hasReached2048 = true;
-
-                showWinPrompt();
-
-                return;
-
-            }
-
-
-            /*
-                Check for game over.
-            */
-
-            if (
-                !canMove()
-            ) {
-
-                showGameOver();
-
-            }
-
-        },
-        MOVE_TIME + 25
-    );
-
+    /*
+       Check for 2048.
+    */
+   
+    if (
+       !hasReached2048 &&
+       contains2048()
+    ) {
+   
+       hasReached2048 = true;
+   
+       showWinPrompt();
+   
+       return;
+   
+    }
+   
+   
+    /*
+       Check for game over.
+    */
+   
+    if (
+       !canMove()
+    ) {
+   
+       showGameOver();
+   
+    }
 }
 
 
